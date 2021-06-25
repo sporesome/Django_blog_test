@@ -5,11 +5,11 @@ services:
     container_name: web
     build:
       context: django_blog_test/.
-    
+    networks:
+      - test-net
     expose:
       - 8000
-    volumes:
-      - ./app:/app
+    
     command: >
       sh -c "python manage.py migrate && gunicorn Blog.wsgi:application --bind 0.0.0.0:8000"
     environment:
@@ -25,6 +25,8 @@ services:
   db:
     container_name: db
     restart: always
+    networks:
+      - test-net
     image: postgres:13-alpine
     environment:
       - POSTGRES_DB=postgres
@@ -39,13 +41,19 @@ services:
     container_name: nginx
     restart: always
     image: nginx:latest
-    links:   
-      - "web:web"
+    networks:
+      - test-net
     ports:
       - "8000:8000"
     volumes:
       - ./django_blog_test/config/nginx/:/etc/nginx/conf.d/
+      
+      
+      
 
+networks:
+  test-net:
+    
 volumes:
   pgdata:
   
